@@ -4,23 +4,39 @@
         {{ id }}-amaliy mashg'ulot
       </h1>
   
+      <!-- Faylni ko'rsatish -->
       <div class="w-full max-w-4xl aspect-video bg-gray-100 dark:bg-gray-800 border rounded-lg shadow overflow-hidden">
-        <iframe
+        <vue-files-preview
           v-if="fileUrl"
-          :src="viewerUrl"
+          :file="fileUrl"
+          :type="fileType"
           class="w-full h-full"
-          frameborder="0"
-          allowfullscreen
-        ></iframe>
+        />
       </div>
     </div>
   </template>
   
   <script>
+  // Importing the necessary component from VueFilesPreview
+  import VueFilesPreview from 'vue-files-preview';
+  
   export default {
+    components: {
+      VueFilesPreview,
+    },
     props: ['id'],
-    computed: {
-      fileName() {
+    data() {
+      return {
+        fileUrl: '',
+        fileType: '',
+      };
+    },
+    mounted() {
+      this.setFileDetails();
+    },
+    methods: {
+      // Fayl nomi va turi
+      setFileDetails() {
         const map = {
           1: '1-amaliy.pptx',
           2: '2-amaliy.ppt',
@@ -29,30 +45,32 @@
           5: '5-amaliy.pdf',
           6: '6-amaliy.pptx',
           7: '7-amaliy.pptx',
-          8: '8-amaliy.docx'
+          8: '8-amaliy.docx',
+        };
+  
+        const fileName = map[this.id];
+        if (fileName) {
+          this.fileUrl = `/assets/amaliy/${fileName}`;
+          this.fileType = this.getFileType(fileName);
         }
-        return map[this.id] || null;
       },
-      fileUrl() {
-        return this.fileName
-          ? `/assets/amaliy/${this.fileName}`
-          : null;
+      // Fayl turini aniqlash
+      getFileType(fileName) {
+        const ext = fileName.split('.').pop().toLowerCase();
+        if (ext === 'pdf') return 'pdf';
+        if (ext === 'pptx' || ext === 'ppt') return 'pptx';
+        if (ext === 'docx') return 'docx';
+        return '';
       },
-      viewerUrl() {
-        if (!this.fileUrl) return '';
-        // Use Google Docs viewer for pptx, ppt, docx; direct embed for PDFs
-        const ext = this.fileUrl.split('.').pop().toLowerCase();
-        if (ext === 'pdf') {
-          return this.fileUrl;
-        } else {
-          return `https://docs.google.com/gview?url=${location.origin}${this.fileUrl}&embedded=true`;
-        }
-      }
-    }
-  }
+    },
+  };
   </script>
   
   <style scoped>
   /* optional: customize iframe wrapper, loader, etc. */
+  canvas {
+    margin: 10px 0;
+    max-width: 100%;
+  }
   </style>
   
